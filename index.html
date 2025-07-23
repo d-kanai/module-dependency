@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏗️ Modular Monolith Analyzer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide React -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    
+    <style>
+        /* Custom styles */
+        .animate-subtle-bounce {
+            animation: subtle-bounce 2s infinite;
+        }
+        
+        @keyframes subtle-bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-2px); }
+        }
+        
+        /* Ensure proper spacing */
+        .space-y-1\.5 > * + * {
+            margin-top: 0.375rem;
+        }
+        
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+        
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+        
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+        
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+        
+        .gap-1\.5 {
+            gap: 0.375rem;
+        }
+        
+        .gap-2\.5 {
+            gap: 0.625rem;
+        }
+        
+        /* Text sizes */
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        
+        /* Heights */
+        .h-2\.5 { height: 0.625rem; }
+        .w-2\.5 { width: 0.625rem; }
+        .h-1\.5 { height: 0.375rem; }
+        
+        /* Custom components styling */
+        .card {
+            @apply rounded-lg border bg-white text-gray-950 shadow-sm;
+        }
+        
+        .badge {
+            @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2;
+        }
+        
+        .badge-default {
+            @apply border-transparent bg-gray-900 text-gray-50 hover:bg-gray-900/80;
+        }
+        
+        .badge-secondary {
+            @apply border-transparent bg-gray-100 text-gray-900 hover:bg-gray-100/80;
+        }
+        
+        .badge-destructive {
+            @apply border-transparent bg-red-500 text-gray-50 hover:bg-red-500/80;
+        }
+        
+        .badge-outline {
+            @apply text-gray-950;
+        }
+        
+        .button {
+            @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        }
+        
+        .button-default {
+            @apply bg-gray-900 text-gray-50 hover:bg-gray-900/90;
+        }
+        
+        .button-outline {
+            @apply border border-gray-200 bg-white hover:bg-gray-100 hover:text-gray-900;
+        }
+        
+        .button-ghost {
+            @apply hover:bg-gray-100 hover:text-gray-900;
+        }
+        
+        .button-sm {
+            @apply h-9 rounded-md px-3;
+        }
+        
+        .textarea {
+            @apply flex min-h-[80px] w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+        }
+        
+        .table {
+            @apply w-full caption-bottom text-sm;
+        }
+        
+        .table-header {
+            @apply [&_tr]:border-b;
+        }
+        
+        .table-body {
+            @apply [&_tr:last-child]:border-0;
+        }
+        
+        .table-row {
+            @apply border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100;
+        }
+        
+        .table-head {
+            @apply h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0;
+        }
+        
+        .table-cell {
+            @apply p-4 align-middle [&:has([role=checkbox])]:pr-0;
+        }
+        
+        .separator {
+            @apply shrink-0 bg-gray-200 h-[1px] w-full;
+        }
+        
+        .tabs {
+            @apply w-full;
+        }
+        
+        .tabs-list {
+            @apply inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500;
+        }
+        
+        .tabs-trigger {
+            @apply inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-sm;
+        }
+        
+        .tabs-content {
+            @apply mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2;
+        }
+        
+        .alert {
+            @apply relative w-full rounded-lg border p-4;
+        }
+        
+        .alert-destructive {
+            @apply border-red-200 text-red-800 [&>svg]:text-red-600;
+        }
+        
+        .collapsible-trigger[data-state="open"] .chevron {
+            transform: rotate(180deg);
+        }
+        
+        .chevron {
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { ChevronDown, ChevronRight, ArrowRight, ExternalLink, CheckCircle, XCircle } = lucideReact;
+
+        // Default modules data
+        const defaultModules = {
+            "modules": [
+                {
+                    "id": "user-management",
+                    "name": "User Management",
+                    "icon": "👤",
+                    "description": "ユーザー認証・プロフィール管理",
+                    "dependencies": ["notification-service"],
+                    "color": "#6366f1",
+                    "classes": [
+                        "UserController",
+                        "AuthService",
+                        "UserRepository",
+                        "ProfileService",
+                        "PasswordResetService",
+                        "UserValidator"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "AuthService",
+                            "to": "notification-service:NotificationAPI",
+                            "description": "ログイン通知・パスワードリセット通知",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "PasswordResetService",
+                            "to": "notification-service:EmailService",
+                            "description": "パスワードリセット用メール送信（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "product-catalog",
+                    "name": "Product Catalog",
+                    "icon": "📦",
+                    "description": "商品情報・カタログ管理",
+                    "dependencies": [],
+                    "color": "#10b981",
+                    "classes": [
+                        "ProductController",
+                        "CategoryService",
+                        "ProductRepository",
+                        "CategoryRepository",
+                        "PricingService",
+                        "ProductValidator",
+                        "ProductAPI"
+                    ],
+                    "classDependencies": []
+                },
+                {
+                    "id": "order-processing",
+                    "name": "Order Processing",
+                    "icon": "🛒",
+                    "description": "注文処理・在庫管理",
+                    "dependencies": ["product-catalog", "user-management", "payment-system"],
+                    "color": "#f59e0b",
+                    "classes": [
+                        "OrderController",
+                        "OrderService",
+                        "OrderRepository",
+                        "CartService",
+                        "OrderValidator",
+                        "ShippingService",
+                        "OrderStatusService"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "OrderService",
+                            "to": "product-catalog:ProductAPI",
+                            "description": "商品在庫確認・価格取得（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "OrderService",
+                            "to": "user-management:UserAPI",
+                            "description": "注文者情報の取得・認証（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "OrderService",
+                            "to": "payment-system:PaymentAPI",
+                            "description": "決済処理の実行（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "ShippingService",
+                            "to": "user-management:UserRepository",
+                            "description": "配送先住所情報の取得（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "payment-system",
+                    "name": "Payment System",
+                    "icon": "💳",
+                    "description": "決済処理・請求管理",
+                    "dependencies": ["notification-service"],
+                    "color": "#ef4444",
+                    "classes": [
+                        "PaymentController",
+                        "PaymentService",
+                        "PaymentGateway",
+                        "BillingService",
+                        "RefundService",
+                        "PaymentValidator",
+                        "InvoiceService",
+                        "PaymentAPI"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "PaymentService",
+                            "to": "notification-service:NotificationAPI",
+                            "description": "決済完了・失敗通知の送信（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "BillingService",
+                            "to": "notification-service:EmailService",
+                            "description": "請求書・領収書のメール送信（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        },
+                        {
+                            "from": "RefundService",
+                            "to": "notification-service:NotificationAPI",
+                            "description": "返金処理完了通知（公開API経由）",
+                            "dependencyType": "good"
+                        }
+                    ]
+                },
+                {
+                    "id": "notification-service",
+                    "name": "Notification Service",
+                    "icon": "📧",
+                    "description": "メール・プッシュ通知",
+                    "dependencies": ["user-management"],
+                    "color": "#8b5cf6",
+                    "classes": [
+                        "NotificationController",
+                        "EmailService",
+                        "SMSService",
+                        "PushNotificationService",
+                        "NotificationQueue",
+                        "TemplateService",
+                        "NotificationRepository",
+                        "NotificationAPI"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "EmailService",
+                            "to": "user-management:UserAPI",
+                            "description": "ユーザーのメールアドレス・設定情報取得（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "PushNotificationService",
+                            "to": "user-management:UserRepository",
+                            "description": "プッシュ通知設定・デバイストークン取得（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "analytics-engine",
+                    "name": "Analytics Engine",
+                    "icon": "📊",
+                    "description": "データ分析・レポート生成",
+                    "dependencies": ["user-management", "order-processing"],
+                    "color": "#06b6d4",
+                    "classes": [
+                        "AnalyticsController",
+                        "ReportService",
+                        "DataCollector",
+                        "MetricsCalculator",
+                        "ReportGenerator",
+                        "DashboardService",
+                        "AnalyticsRepository"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "DataCollector",
+                            "to": "user-management:UserAPI",
+                            "description": "ユーザー行動データの収集（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "DataCollector",
+                            "to": "order-processing:OrderRepository",
+                            "description": "注文・売上データの収集（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        },
+                        {
+                            "from": "ReportService",
+                            "to": "order-processing:OrderAPI",
+                            "description": "売上レポート用データ取得（公開API経由）",
+                            "dependencyType": "good"
+                        }
+                    ]
+                },
+                {
+                    "id": "inventory-management",
+                    "name": "Inventory Management",
+                    "icon": "📋",
+                    "description": "在庫管理・補充システム",
+                    "dependencies": ["product-catalog"],
+                    "color": "#84cc16",
+                    "classes": [
+                        "InventoryController",
+                        "StockService",
+                        "InventoryRepository",
+                        "WarehouseService",
+                        "SupplierService",
+                        "StockAlertService"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "StockService",
+                            "to": "product-catalog:ProductAPI",
+                            "description": "商品情報・SKU管理（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "StockAlertService",
+                            "to": "product-catalog:ProductRepository",
+                            "description": "在庫切れ商品の確認（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "search-service",
+                    "name": "Search Service",
+                    "icon": "🔍",
+                    "description": "商品検索・フィルタリング",
+                    "dependencies": ["product-catalog"],
+                    "color": "#f97316",
+                    "classes": [
+                        "SearchController",
+                        "SearchService",
+                        "IndexService",
+                        "FilterService",
+                        "SearchRepository",
+                        "AutoCompleteService"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "SearchService",
+                            "to": "product-catalog:ProductAPI",
+                            "description": "商品データのインデックス作成・検索（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "IndexService",
+                            "to": "product-catalog:CategoryRepository",
+                            "description": "カテゴリ情報のインデックス化（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "content-management",
+                    "name": "Content Management",
+                    "icon": "📝",
+                    "description": "CMS・ブログ・ページ管理",
+                    "dependencies": ["user-management"],
+                    "color": "#ec4899",
+                    "classes": [
+                        "ContentController",
+                        "PageService",
+                        "BlogService",
+                        "MediaService",
+                        "ContentRepository",
+                        "SEOService",
+                        "ContentValidator"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "ContentController",
+                            "to": "user-management:UserAPI",
+                            "description": "コンテンツ編集権限の確認（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "BlogService",
+                            "to": "user-management:UserRepository",
+                            "description": "記事作成者情報の取得（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                },
+                {
+                    "id": "api-gateway",
+                    "name": "API Gateway",
+                    "icon": "🌐",
+                    "description": "API認証・ルーティング・制限",
+                    "dependencies": ["user-management", "notification-service"],
+                    "color": "#6b7280",
+                    "classes": [
+                        "GatewayController",
+                        "RouteService",
+                        "AuthMiddleware",
+                        "RateLimitService",
+                        "LoggingService",
+                        "SecurityService",
+                        "ProxyService"
+                    ],
+                    "classDependencies": [
+                        {
+                            "from": "AuthMiddleware",
+                            "to": "user-management:UserAPI",
+                            "description": "APIリクエスト認証・JWT検証（公開API経由）",
+                            "dependencyType": "good"
+                        },
+                        {
+                            "from": "SecurityService",
+                            "to": "notification-service:NotificationRepository",
+                            "description": "セキュリティアラート通知（内部クラス直接アクセス）",
+                            "dependencyType": "bad"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Circular dependency detection function
+        function detectCircularDependencies(modules) {
+            const circularDependencies = [];
+            const foundCycles = new Set();
+            
+            function hasCycleDFS(moduleId, visited, path) {
+                if (path.includes(moduleId)) {
+                    const cycleStart = path.indexOf(moduleId);
+                    return [...path.slice(cycleStart), moduleId];
+                }
+                
+                if (visited.has(moduleId)) {
+                    return null;
+                }
+                
+                visited.add(moduleId);
+                const module = modules.find(m => m.id === moduleId);
+                
+                if (!module) return null;
+                
+                for (const depId of module.dependencies) {
+                    const cycle = hasCycleDFS(depId, visited, [...path, moduleId]);
+                    if (cycle) {
+                        return cycle;
+                    }
+                }
+                
+                return null;
+            }
+            
+            function normalizeCycle(cycle) {
+                if (cycle.length <= 1) return cycle.join('-');
+                
+                const cleanCycle = cycle.slice(0, -1);
+                const minIndex = cleanCycle.indexOf(Math.min(...cleanCycle.map(id => id)).toString());
+                const normalized = [...cleanCycle.slice(minIndex), ...cleanCycle.slice(0, minIndex)];
+                
+                return normalized.join('-');
+            }
+            
+            const globalVisited = new Set();
+            
+            for (const module of modules) {
+                if (!globalVisited.has(module.id)) {
+                    const cycle = hasCycleDFS(module.id, new Set(), []);
+                    if (cycle) {
+                        const normalizedCycle = normalizeCycle(cycle);
+                        
+                        if (!foundCycles.has(normalizedCycle)) {
+                            foundCycles.add(normalizedCycle);
+                            const uniqueModules = [...new Set(cycle.slice(0, -1))];
+                            circularDependencies.push({
+                                cycle: [...uniqueModules, uniqueModules[0]],
+                                modules: uniqueModules
+                            });
+                        }
+                        
+                        const uniqueModules = [...new Set(cycle.slice(0, -1))];
+                        uniqueModules.forEach(id => globalVisited.add(id));
+                    } else {
+                        globalVisited.add(module.id);
+                    }
+                }
+            }
+            
+            return circularDependencies;
+        }
+
+        // UI Components
+        const Card = ({ children, className = "", ...props }) => (
+            <div className={`card ${className}`} {...props}>
+                {children}
+            </div>
+        );
+
+        const Badge = ({ children, variant = "default", className = "", ...props }) => (
+            <span className={`badge badge-${variant} ${className}`} {...props}>
+                {children}
+            </span>
+        );
+
+        const Button = ({ children, variant = "default", size = "default", className = "", ...props }) => (
+            <button className={`button button-${variant} ${size === "sm" ? "button-sm" : ""} ${className}`} {...props}>
+                {children}
+            </button>
+        );
+
+        const Textarea = ({ className = "", ...props }) => (
+            <textarea className={`textarea ${className}`} {...props} />
+        );
+
+        const Table = ({ children, className = "", ...props }) => (
+            <table className={`table ${className}`} {...props}>
+                {children}
+            </table>
+        );
+
+        const TableHeader = ({ children, ...props }) => (
+            <thead className="table-header" {...props}>
+                {children}
+            </thead>
+        );
+
+        const TableBody = ({ children, ...props }) => (
+            <tbody className="table-body" {...props}>
+                {children}
+            </tbody>
+        );
+
+        const TableRow = ({ children, className = "", ...props }) => (
+            <tr className={`table-row ${className}`} {...props}>
+                {children}
+            </tr>
+        );
+
+        const TableHead = ({ children, className = "", ...props }) => (
+            <th className={`table-head ${className}`} {...props}>
+                {children}
+            </th>
+        );
+
+        const TableCell = ({ children, className = "", ...props }) => (
+            <td className={`table-cell ${className}`} {...props}>
+                {children}
+            </td>
+        );
+
+        const Separator = ({ className = "", ...props }) => (
+            <hr className={`separator ${className}`} {...props} />
+        );
+
+        const Tabs = ({ children, value, onValueChange, className = "", ...props }) => (
+            <div className={`tabs ${className}`} {...props}>
+                {React.Children.map(children, child =>
+                    React.cloneElement(child, { value, onValueChange })
+                )}
+            </div>
+        );
+
+        const TabsList = ({ children, className = "", ...props }) => (
+            <div className={`tabs-list ${className}`} {...props}>
+                {children}
+            </div>
+        );
+
+        const TabsTrigger = ({ children, value: triggerValue, value, onValueChange, className = "", ...props }) => (
+            <button 
+                className={`tabs-trigger ${value === triggerValue ? 'data-[state=active]' : ''} ${className}`}
+                onClick={() => onValueChange(triggerValue)}
+                {...props}
+            >
+                {children}
+            </button>
+        );
+
+        const TabsContent = ({ children, value: contentValue, value, className = "", ...props }) => (
+            value === contentValue ? (
+                <div className={`tabs-content ${className}`} {...props}>
+                    {children}
+                </div>
+            ) : null
+        );
+
+        const Alert = ({ children, variant = "default", className = "", ...props }) => (
+            <div className={`alert ${variant === "destructive" ? "alert-destructive" : ""} ${className}`} {...props}>
+                {children}
+            </div>
+        );
+
+        const AlertDescription = ({ children, ...props }) => (
+            <div {...props}>
+                {children}
+            </div>
+        );
+
+        const Collapsible = ({ children, open, onOpenChange, ...props }) => (
+            <div {...props}>
+                {React.Children.map(children, child =>
+                    React.cloneElement(child, { open, onOpenChange })
+                )}
+            </div>
+        );
+
+        const CollapsibleTrigger = ({ children, open, onOpenChange, asChild, ...props }) => {
+            if (asChild && React.isValidElement(children)) {
+                return React.cloneElement(children, {
+                    onClick: () => onOpenChange(!open),
+                    'data-state': open ? 'open' : 'closed',
+                    ...props
+                });
+            }
+            return (
+                <button 
+                    onClick={() => onOpenChange(!open)}
+                    data-state={open ? 'open' : 'closed'}
+                    {...props}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const CollapsibleContent = ({ children, open, ...props }) => (
+            open ? <div {...props}>{children}</div> : null
+        );
+
+        // ModuleViewer Component
+        const ModuleViewer = ({ modules, selectedModule, onModuleSelect, circularDependencies = [] }) => {
+            const circleRadius = 20;
+            
+            const circularModules = new Set(
+                circularDependencies.flatMap(dep => dep.modules)
+            );
+            
+            const circularPairs = new Set();
+            circularDependencies.forEach(dep => {
+                for (let i = 0; i < dep.cycle.length - 1; i++) {
+                    const from = dep.cycle[i];
+                    const to = dep.cycle[i + 1];
+                    circularPairs.add(`${from}->${to}`);
+                }
+            });
+            
+            const isSelectedModuleInCircularDependency = (fromId, toId) => {
+                if (!selectedModule) return false;
+                
+                const relevantCircularDep = circularDependencies.find(dep => 
+                    dep.modules.includes(selectedModule) && 
+                    dep.cycle.includes(fromId) && 
+                    dep.cycle.includes(toId)
+                );
+                
+                return !!relevantCircularDep;
+            };
+            
+            const getModulePositions = () => {
+                const centerX = 300;
+                const centerY = 250;
+                const radius = 140;
+                
+                return modules.map((module, index) => {
+                    const angle = (index * 2 * Math.PI) / modules.length - Math.PI / 2;
+                    return {
+                        ...module,
+                        x: centerX + radius * Math.cos(angle),
+                        y: centerY + radius * Math.sin(angle)
+                    };
+                });
+            };
+            
+            const modulePositions = getModulePositions();
+            
+            const getLineCoordinates = (from, to) => {
+                const dx = to.x - from.x;
+                const dy = to.y - from.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                const unitX = dx / distance;
+                const unitY = dy / distance;
+                
+                const startX = from.x + unitX * circleRadius;
+                const startY = from.y + unitY * circleRadius;
+                const endX = to.x - unitX * circleRadius;
+                const endY = to.y - unitY * circleRadius;
+                
+                return { startX, startY, endX, endY };
+            };
+            
+            const getDependencyPaths = () => {
+                const paths = [];
+                
+                modulePositions.forEach(fromModule => {
+                    fromModule.dependencies.forEach(depId => {
+                        const toModule = modulePositions.find(m => m.id === depId);
+                        if (toModule) {
+                            let relationshipType = 'normal';
+                            let isHighlighted = false;
+                            
+                            if (selectedModule) {
+                                const isCircular = circularPairs.has(`${fromModule.id}->${toModule.id}`) && 
+                                                  isSelectedModuleInCircularDependency(fromModule.id, toModule.id);
+                                
+                                if (isCircular) {
+                                    relationshipType = 'circular';
+                                    isHighlighted = true;
+                                } else if (selectedModule === fromModule.id) {
+                                    relationshipType = 'outgoing';
+                                    isHighlighted = true;
+                                } else if (selectedModule === toModule.id) {
+                                    relationshipType = 'incoming';
+                                    isHighlighted = true;
+                                }
+                            }
+                            
+                            const { startX, startY, endX, endY } = getLineCoordinates(fromModule, toModule);
+                            
+                            paths.push({
+                                from: { x: fromModule.x, y: fromModule.y, id: fromModule.id },
+                                to: { x: toModule.x, y: toModule.y, id: toModule.id },
+                                startX,
+                                startY,
+                                endX,
+                                endY,
+                                isHighlighted,
+                                relationshipType
+                            });
+                        }
+                    });
+                });
+                
+                return paths;
+            };
+            
+            const dependencyPaths = getDependencyPaths();
+            
+            const handleModuleClick = (moduleId) => {
+                if (selectedModule === moduleId) {
+                    onModuleSelect(null);
+                } else {
+                    onModuleSelect(moduleId);
+                }
+            };
+            
+            return (
+                <div className="w-full overflow-hidden">
+                    <svg
+                        width="100%"
+                        height="500"
+                        viewBox="0 0 600 500"
+                        className="border rounded-lg bg-gradient-to-br from-white to-gray-50"
+                    >
+                        <defs>
+                            <marker
+                                id="arrowhead"
+                                markerWidth="6"
+                                markerHeight="4"
+                                refX="5"
+                                refY="2"
+                                orient="auto"
+                            >
+                                <polygon
+                                    points="0 0, 6 2, 0 4"
+                                    fill="#9CA3AF"
+                                />
+                            </marker>
+                            
+                            <marker
+                                id="arrowhead-outgoing"
+                                markerWidth="7"
+                                markerHeight="5"
+                                refX="6"
+                                refY="2.5"
+                                orient="auto"
+                            >
+                                <polygon
+                                    points="0 0, 7 2.5, 0 5"
+                                    fill="#f97316"
+                                    stroke="#ea580c"
+                                    strokeWidth="0.3"
+                                />
+                            </marker>
+                            
+                            <marker
+                                id="arrowhead-incoming"
+                                markerWidth="7"
+                                markerHeight="5"
+                                refX="6"
+                                refY="2.5"
+                                orient="auto"
+                            >
+                                <polygon
+                                    points="0 0, 7 2.5, 0 5"
+                                    fill="#3b82f6"
+                                    stroke="#2563eb"
+                                    strokeWidth="0.3"
+                                />
+                            </marker>
+                            
+                            <marker
+                                id="arrowhead-circular"
+                                markerWidth="7"
+                                markerHeight="5"
+                                refX="6"
+                                refY="2.5"
+                                orient="auto"
+                            >
+                                <polygon
+                                    points="0 0, 7 2.5, 0 5"
+                                    fill="#dc2626"
+                                    stroke="#b91c1c"
+                                    strokeWidth="0.3"
+                                />
+                            </marker>
+                        </defs>
+                        
+                        {dependencyPaths.map((path, index) => {
+                            let strokeColor = '#d1d5db';
+                            let strokeWidth = '2';
+                            let markerEnd = 'url(#arrowhead)';
+                            let opacity = selectedModule && !path.isHighlighted ? 0.2 : 1;
+                            let strokeDasharray = 'none';
+                            
+                            if (path.relationshipType === 'circular') {
+                                strokeColor = '#dc2626';
+                                strokeWidth = '3';
+                                markerEnd = 'url(#arrowhead-circular)';
+                            } else if (path.relationshipType === 'outgoing') {
+                                strokeColor = '#f97316';
+                                strokeWidth = '3';
+                                markerEnd = 'url(#arrowhead-outgoing)';
+                            } else if (path.relationshipType === 'incoming') {
+                                strokeColor = '#3b82f6';
+                                strokeWidth = '3';
+                                markerEnd = 'url(#arrowhead-incoming)';
+                                strokeDasharray = '8,4';
+                            }
+                            
+                            return (
+                                <g key={index}>
+                                    <line
+                                        x1={path.startX}
+                                        y1={path.startY}
+                                        x2={path.endX}
+                                        y2={path.endY}
+                                        stroke={strokeColor}
+                                        strokeWidth={strokeWidth}
+                                        strokeDasharray={strokeDasharray}
+                                        markerEnd={markerEnd}
+                                        className={path.relationshipType === 'circular' ? 'animate-pulse transition-all duration-300' : 'transition-all duration-300'}
+                                        opacity={opacity}
+                                    />
+                                    
+                                    {path.isHighlighted && (
+                                        <circle 
+                                            r="2" 
+                                            fill={
+                                                path.relationshipType === 'circular' ? '#dc2626' :
+                                                path.relationshipType === 'outgoing' ? '#f97316' : '#3b82f6'
+                                            } 
+                                            opacity="0.8"
+                                        >
+                                            <animateMotion dur={path.relationshipType === 'circular' ? '1s' : '2s'} repeatCount="indefinite">
+                                                <mpath>
+                                                    <path d={`M ${path.startX} ${path.startY} L ${path.endX} ${path.endY}`} />
+                                                </mpath>
+                                            </animateMotion>
+                                        </circle>
+                                    )}
+                                </g>
+                            );
+                        })}
+                        
+                        {modulePositions.map((module) => {
+                            const isSelected = selectedModule === module.id;
+                            const isConnected = selectedModule && (
+                                module.dependencies.includes(selectedModule) ||
+                                modulePositions.find(m => m.id === selectedModule)?.dependencies.includes(module.id)
+                            );
+                            const isCircular = circularModules.has(module.id);
+                            
+                            const selectedInCircularDep = selectedModule && circularModules.has(selectedModule);
+                            const shouldShowCircularWarning = isCircular && selectedInCircularDep && (isSelected || isConnected);
+                            
+                            const opacity = selectedModule && !isSelected && !isConnected ? 0.4 : 1;
+                            
+                            return (
+                                <g key={module.id} className="cursor-pointer group" onClick={() => handleModuleClick(module.id)}>
+                                    {shouldShowCircularWarning && (
+                                        <circle
+                                            cx={module.x}
+                                            cy={module.y}
+                                            r="28"
+                                            fill="none"
+                                            stroke="#dc2626"
+                                            strokeWidth="2"
+                                            opacity="0.6"
+                                            strokeDasharray="4,4"
+                                            className="animate-pulse"
+                                        />
+                                    )}
+                                    
+                                    {isSelected && (
+                                        <circle
+                                            cx={module.x}
+                                            cy={module.y}
+                                            r="30"
+                                            fill="none"
+                                            stroke="#6366f1"
+                                            strokeWidth="2"
+                                            opacity="0.6"
+                                        >
+                                            <animate
+                                                attributeName="r"
+                                                values="30;35;30"
+                                                dur="2s"
+                                                repeatCount="indefinite"
+                                            />
+                                        </circle>
+                                    )}
+                                    
+                                    <circle
+                                        cx={module.x}
+                                        cy={module.y}
+                                        r={circleRadius}
+                                        fill={module.color}
+                                        opacity={opacity}
+                                        className="transition-all duration-200 group-hover:transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                                        filter={isSelected ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' : ''}
+                                        stroke={shouldShowCircularWarning ? '#dc2626' : 'none'}
+                                        strokeWidth={shouldShowCircularWarning ? '2' : '0'}
+                                    />
+                                    
+                                    <text
+                                        x={module.x}
+                                        y={module.y + 3}
+                                        textAnchor="middle"
+                                        fontSize="14"
+                                        opacity={opacity}
+                                        className="pointer-events-none transition-all duration-200 group-hover:transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                                    >
+                                        {module.icon}
+                                    </text>
+                                    
+                                    {shouldShowCircularWarning && (
+                                        <text
+                                            x={module.x - 18}
+                                            y={module.y - 12}
+                                            textAnchor="middle"
+                                            fontSize="10"
+                                            className="pointer-events-none animate-subtle-bounce"
+                                        >
+                                            ⚠️
+                                        </text>
+                                    )}
+                                    
+                                    <text
+                                        x={module.x}
+                                        y={module.y + 40}
+                                        textAnchor="middle"
+                                        fontSize="10"
+                                        fill="#374151"
+                                        opacity={opacity}
+                                        className="pointer-events-none font-medium"
+                                    >
+                                        {module.name.split(' ').map((word, index) => (
+                                            <tspan key={index} x={module.x} dy={index === 0 ? 0 : 11}>
+                                                {word}
+                                            </tspan>
+                                        ))}
+                                    </text>
+                                    
+                                    {module.dependencies.length > 0 && (
+                                        <g className="transition-all duration-200 group-hover:transform group-hover:translate-x-1 group-hover:-translate-y-1">
+                                            <circle
+                                                cx={module.x + 15}
+                                                cy={module.y - 15}
+                                                r="6"
+                                                fill={shouldShowCircularWarning ? "#dc2626" : "#ef4444"}
+                                                opacity={opacity}
+                                            />
+                                            <text
+                                                x={module.x + 15}
+                                                y={module.y - 11}
+                                                textAnchor="middle"
+                                                fontSize="8"
+                                                fill="white"
+                                                opacity={opacity}
+                                                className="pointer-events-none font-medium"
+                                            >
+                                                {module.dependencies.length}
+                                            </text>
+                                        </g>
+                                    )}
+                                </g>
+                            );
+                        })}
+                        
+                        <text
+                            x="300"
+                            y="30"
+                            textAnchor="middle"
+                            fontSize="16"
+                            fill="#6b7280"
+                            className="font-medium"
+                        >
+                            🎯 モジュール依存関係マップ
+                        </text>
+                    </svg>
+                    
+                    <div className="mt-4 text-sm text-gray-500 text-center space-y-1">
+                        <p>💡 モジュールをクリックして依存関係をハイライト表示</p>
+                        {selectedModule && (
+                            <p className="text-xs">
+                                <span className="inline-block w-3 h-0.5 bg-orange-500 mr-1 align-middle"></span>
+                                オレンジ実線: 依存先 | 
+                                <span className="inline-block w-3 h-0.5 bg-blue-500 mr-1 ml-1 align-middle border-dashed"></span>
+                                青破線: 依存元
+                            </p>
+                        )}
+                        {selectedModule && circularModules.has(selectedModule) && (
+                            <p className="text-xs text-red-600">
+                                <span className="inline-block w-3 h-0.5 bg-red-600 mr-1 align-middle"></span>
+                                赤線: 相互依存（⚠️警告）
+                            </p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ModuleTable Component
+        const ModuleTable = ({ modules, selectedModule, onModuleSelect, circularDependencies = [] }) => {
+            const handleRowClick = (moduleId) => {
+                if (selectedModule === moduleId) {
+                    onModuleSelect(null);
+                } else {
+                    onModuleSelect(moduleId);
+                }
+            };
+            
+            const circularModules = new Set(
+                circularDependencies.flatMap(dep => dep.modules)
+            );
+            
+            const getDependentModules = (moduleId) => {
+                return modules.filter(module => module.dependencies.includes(moduleId));
+            };
+            
+            const isCircularDependency = (fromId, toId) => {
+                if (!selectedModule) return false;
+                
+                return circularDependencies.some(dep => 
+                    dep.modules.includes(selectedModule) &&
+                    dep.cycle.includes(fromId) && 
+                    dep.cycle.includes(toId) && 
+                    Math.abs(dep.cycle.indexOf(fromId) - dep.cycle.indexOf(toId)) === 1
+                );
+            };
+            
+            const sortedModules = [...modules].sort((a, b) => {
+                const aIsCircular = circularModules.has(a.id);
+                const bIsCircular = circularModules.has(b.id);
+                
+                if (aIsCircular && !bIsCircular) return -1;
+                if (!aIsCircular && bIsCircular) return 1;
+                
+                return b.dependencies.length - a.dependencies.length;
+            });
+            
+            return (
+                <div className="space-y-4">
+                    {circularDependencies.length > 0 && (
+                        <div className="border rounded-lg p-4 bg-red-50 border-red-200">
+                            <h3 className="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                                ⚠️ 検出された相互依存
+                            </h3>
+                            <div className="space-y-2">
+                                {circularDependencies.map((dep, index) => (
+                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                        <Badge variant="destructive">循環 {index + 1}</Badge>
+                                        <span className="text-red-700">
+                                            {dep.cycle.map((moduleId, i) => {
+                                                const module = modules.find(m => m.id === moduleId);
+                                                return (
+                                                    <span key={moduleId}>
+                                                        <span 
+                                                            className="cursor-pointer hover:underline font-medium"
+                                                            onClick={() => onModuleSelect(moduleId)}
+                                                        >
+                                                            {module?.icon} {module?.name}
+                                                        </span>
+                                                        {i < dep.cycle.length - 1 && ' → '}
+                                                    </span>
+                                                );
+                                            })}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="border rounded-lg overflow-hidden">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-50">
+                                    <TableHead className="w-16">アイコン</TableHead>
+                                    <TableHead>モジュール名</TableHead>
+                                    <TableHead>説明</TableHead>
+                                    <TableHead className="w-24">依存先数</TableHead>
+                                    <TableHead>依存先</TableHead>
+                                    <TableHead className="w-24">依存元数</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {sortedModules.map((module) => {
+                                    const isSelected = selectedModule === module.id;
+                                    const dependentModules = getDependentModules(module.id);
+                                    
+                                    const isOutgoing = selectedModule && !isSelected && module.dependencies.includes(selectedModule);
+                                    const isIncoming = selectedModule && !isSelected && dependentModules.some(dep => dep.id === selectedModule);
+                                    const isCircular = circularModules.has(module.id);
+                                    
+                                    const selectedInCircularDep = selectedModule && circularModules.has(selectedModule);
+                                    const shouldShowCircularWarning = isCircular && selectedInCircularDep && (isSelected || isOutgoing || isIncoming);
+                                    
+                                    let rowClassName = 'cursor-pointer transition-all duration-200 hover:bg-gray-50';
+                                    
+                                    if (isSelected) {
+                                        rowClassName = 'cursor-pointer transition-all duration-200 bg-indigo-50 border-indigo-200';
+                                    } else if (shouldShowCircularWarning) {
+                                        rowClassName = 'cursor-pointer transition-all duration-200 bg-red-50 border-red-200';
+                                    } else if (isOutgoing) {
+                                        rowClassName = 'cursor-pointer transition-all duration-200 bg-orange-50 border-orange-200';
+                                    } else if (isIncoming) {
+                                        rowClassName = 'cursor-pointer transition-all duration-200 bg-blue-50 border-blue-200';
+                                    }
+                                    
+                                    const opacity = selectedModule && !isSelected && !isOutgoing && !isIncoming && !shouldShowCircularWarning ? 0.5 : 1;
+                                    
+                                    return (
+                                        <TableRow
+                                            key={module.id}
+                                            className={rowClassName}
+                                            style={{ opacity }}
+                                            onClick={() => handleRowClick(module.id)}
+                                        >
+                                            <TableCell>
+                                                <div 
+                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white relative ${
+                                                        shouldShowCircularWarning ? 'ring-2 ring-red-500 ring-offset-1' : ''
+                                                    }`}
+                                                    style={{ backgroundColor: module.color }}
+                                                >
+                                                    {module.icon}
+                                                    {shouldShowCircularWarning && (
+                                                        <span className="absolute -top-1 -right-1 text-xs">⚠️</span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center gap-2">
+                                                    {module.name}
+                                                    {isSelected && (
+                                                        <Badge variant="default" className="text-xs">
+                                                            選択中
+                                                        </Badge>
+                                                    )}
+                                                    {isOutgoing && (
+                                                        <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                                                            依存元
+                                                        </Badge>
+                                                    )}
+                                                    {isIncoming && (
+                                                        <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                                            依存先
+                                                        </Badge>
+                                                    )}
+                                                    {shouldShowCircularWarning && (
+                                                        <Badge variant="destructive" className="text-xs animate-pulse">
+                                                            相互依存
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-sm text-gray-500">
+                                                {module.description}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={
+                                                    shouldShowCircularWarning ? 'destructive' : 
+                                                    module.dependencies.length > 0 ? 'destructive' : 'secondary'
+                                                }>
+                                                    {module.dependencies.length}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {module.dependencies.length > 0 ? (
+                                                        module.dependencies.map((depId) => {
+                                                            const depModule = modules.find(m => m.id === depId);
+                                                            const isCircularDep = isCircularDependency(module.id, depId);
+                                                            return depModule ? (
+                                                                <Badge 
+                                                                    key={depId} 
+                                                                    variant={isCircularDep ? 'destructive' : 'outline'}
+                                                                    className={`text-xs cursor-pointer ${
+                                                                        isCircularDep ? 'animate-pulse' : ''
+                                                                    }`}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        onModuleSelect(depId);
+                                                                    }}
+                                                                >
+                                                                    {isCircularDep && '⚠️ '}
+                                                                    {depModule.icon} {depModule.name}
+                                                                </Badge>
+                                                            ) : null;
+                                                        })
+                                                    ) : (
+                                                        <span className="text-xs text-gray-500">無し</span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={dependentModules.length > 0 ? 'default' : 'secondary'}>
+                                                    {dependentModules.length}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
+                    
+                    <div className="text-sm text-gray-500 text-center space-y-1">
+                        <p>💡 行をクリックしてモジュールを選択 | 依存先バッジをクリックして関連モジュールにジャンプ</p>
+                        {selectedModule && (
+                            <div className="text-xs space-y-1">
+                                <div className="flex justify-center gap-4 flex-wrap">
+                                    <span className="flex items-center gap-1">
+                                        <div className="w-3 h-2 bg-indigo-100 border border-indigo-200 rounded"></div>
+                                        選択中
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <div className="w-3 h-2 bg-orange-100 border border-orange-200 rounded"></div>
+                                        依存元（このモジュールに依存されている）
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <div className="w-3 h-2 bg-blue-100 border border-blue-200 rounded"></div>
+                                        依存先（このモジュールが依存している）
+                                    </span>
+                                    {circularModules.has(selectedModule) && (
+                                        <span className="flex items-center gap-1">
+                                            <div className="w-3 h-2 bg-red-100 border border-red-200 rounded"></div>
+                                            相互依存
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // JsonInput Component
+        const JsonInput = ({ initialData, onUpdate }) => {
+            const [jsonText, setJsonText] = useState('');
+            const [error, setError] = useState(null);
+            const [isValid, setIsValid] = useState(true);
+            const [moduleCount, setModuleCount] = useState(0);
+            const [dependencyStats, setDependencyStats] = useState({ good: 0, bad: 0, unknown: 0 });
+            
+            useEffect(() => {
+                const initialText = JSON.stringify(initialData, null, 2);
+                setJsonText(initialText);
+                setModuleCount(initialData?.modules?.length || 0);
+                calculateDependencyStats(initialData);
+                setIsValid(true);
+                setError(null);
+            }, [initialData]);
+            
+            const calculateDependencyStats = (data) => {
+                if (!data?.modules) {
+                    setDependencyStats({ good: 0, bad: 0, unknown: 0 });
+                    return;
+                }
+                
+                let good = 0;
+                let bad = 0;
+                let unknown = 0;
+                
+                data.modules.forEach((module) => {
+                    if (module.classDependencies) {
+                        module.classDependencies.forEach((dep) => {
+                            if (dep.dependencyType === 'good') {
+                                good++;
+                            } else if (dep.dependencyType === 'bad') {
+                                bad++;
+                            } else {
+                                unknown++;
+                            }
+                        });
+                    }
+                });
+                
+                setDependencyStats({ good, bad, unknown });
+            };
+            
+            const validateAndUpdate = (text) => {
+                if (!text.trim()) {
+                    setError('JSONデータが空です');
+                    setIsValid(false);
+                    setModuleCount(0);
+                    setDependencyStats({ good: 0, bad: 0, unknown: 0 });
+                    return;
+                }
+                
+                try {
+                    const parsed = JSON.parse(text);
+                    
+                    if (!parsed.modules || !Array.isArray(parsed.modules)) {
+                        throw new Error('modules配列が必要です');
+                    }
+                    
+                    parsed.modules.forEach((module, index) => {
+                        const required = ['id', 'name', 'icon', 'description', 'dependencies', 'color'];
+                        required.forEach(field => {
+                            if (!(field in module)) {
+                                throw new Error(`モジュール${index + 1}に${field}が不足しています`);
+                            }
+                        });
+                        
+                        if ('classes' in module && !Array.isArray(module.classes)) {
+                            throw new Error(`モジュール${index + 1}のclassesは配列である必要があります`);
+                        }
+                        
+                        if ('classDependencies' in module && !Array.isArray(module.classDependencies)) {
+                            throw new Error(`モジュール${index + 1}のclassDependenciesは配列である必要があります`);
+                        }
+                        
+                        if (module.classDependencies) {
+                            module.classDependencies.forEach((dep, depIndex) => {
+                                const requiredDepFields = ['from', 'to', 'description'];
+                                requiredDepFields.forEach(field => {
+                                    if (!(field in dep)) {
+                                        throw new Error(`モジュール${index + 1}のclassDependencies[${depIndex}]に${field}が不足しています`);
+                                    }
+                                });
+                                
+                                if ('dependencyType' in dep && !['good', 'bad'].includes(dep.dependencyType)) {
+                                    throw new Error(`モジュール${index + 1}のclassDependencies[${depIndex}]のdependencyTypeは'good'または'bad'である必要があります`);
+                                }
+                            });
+                        }
+                    });
+                    
+                    setError(null);
+                    setIsValid(true);
+                    setModuleCount(parsed.modules.length);
+                    calculateDependencyStats(parsed);
+                    onUpdate(parsed);
+                } catch (err) {
+                    setError(err instanceof Error ? err.message : 'JSON形式が無効です');
+                    setIsValid(false);
+                    setModuleCount(0);
+                    setDependencyStats({ good: 0, bad: 0, unknown: 0 });
+                }
+            };
+            
+            const handleTextChange = (text) => {
+                setJsonText(text);
+                validateAndUpdate(text);
+            };
+            
+            const resetToDefault = () => {
+                const defaultData = {
+                    "modules": [
+                        {
+                            "id": "user-management",
+                            "name": "User Management",
+                            "icon": "👤",
+                            "description": "ユーザー認証・プロフィール管理",
+                            "dependencies": ["notification-service"],
+                            "color": "#6366f1",
+                            "classes": [
+                                "UserController",
+                                "AuthService",
+                                "UserRepository"
+                            ],
+                            "classDependencies": [
+                                {
+                                    "from": "AuthService",
+                                    "to": "notification-service:NotificationAPI",
+                                    "description": "ログイン通知・パスワードリセット通知（公開API経由）",
+                                    "dependencyType": "good"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "notification-service",
+                            "name": "Notification Service",
+                            "icon": "📧",
+                            "description": "メール・プッシュ通知",
+                            "dependencies": ["user-management"],
+                            "color": "#8b5cf6",
+                            "classes": [
+                                "NotificationController",
+                                "EmailService",
+                                "SMSService",
+                                "NotificationAPI"
+                            ],
+                            "classDependencies": [
+                                {
+                                    "from": "EmailService",
+                                    "to": "user-management:UserRepository",
+                                    "description": "ユーザーのメールアドレス・設定情報取得（内部クラス直接アクセス）",
+                                    "dependencyType": "bad"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "payment-system",
+                            "name": "Payment System",
+                            "icon": "💳",
+                            "description": "決済処理・請求管理",
+                            "dependencies": ["notification-service"],
+                            "color": "#ef4444",
+                            "classes": [
+                                "PaymentController",
+                                "PaymentService",
+                                "PaymentGateway",
+                                "PaymentAPI"
+                            ],
+                            "classDependencies": [
+                                {
+                                    "from": "PaymentService",
+                                    "to": "notification-service:NotificationAPI",
+                                    "description": "決済完了・失敗通知の送信（公開API経由）",
+                                    "dependencyType": "good"
+                                }
+                            ]
+                        }
+                    ]
+                };
+                const newJsonText = JSON.stringify(defaultData, null, 2);
+                setJsonText(newJsonText);
+                setIsValid(true);
+                setError(null);
+                setModuleCount(defaultData.modules.length);
+                calculateDependencyStats(defaultData);
+                onUpdate(defaultData);
+            };
+            
+            const formatJson = () => {
+                if (!jsonText.trim()) return;
+                
+                try {
+                    const parsed = JSON.parse(jsonText);
+                    const formatted = JSON.stringify(parsed, null, 2);
+                    setJsonText(formatted);
+                } catch (err) {
+                    // フォーマットできない場合は何もしない
+                }
+            };
+            
+            return (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant={isValid ? 'default' : 'destructive'}>
+                                {isValid ? '✅ 有効' : '❌ 無効'}
+                            </Badge>
+                            {isValid && moduleCount > 0 && (
+                                <span className="text-sm text-gray-500">
+                                    {moduleCount} モジュール
+                                </span>
+                            )}
+                            {isValid && (dependencyStats.good > 0 || dependencyStats.bad > 0) && (
+                                <div className="flex items-center gap-1">
+                                    {dependencyStats.good > 0 && (
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                                            ✅ {dependencyStats.good}
+                                        </Badge>
+                                    )}
+                                    {dependencyStats.bad > 0 && (
+                                        <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 text-xs">
+                                            ❌ {dependencyStats.bad}
+                                        </Badge>
+                                    )}
+                                    {dependencyStats.unknown > 0 && (
+                                        <Badge variant="secondary" className="bg-gray-100 text-gray-800 border-gray-200 text-xs">
+                                            ❓ {dependencyStats.unknown}
+                                        </Badge>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={formatJson}>
+                                ✨ 整形
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={resetToDefault}>
+                                🔄 リセット
+                            </Button>
+                        </div>
+                    </div>
+                    
+                    <Textarea
+                        value={jsonText}
+                        onChange={(e) => handleTextChange(e.target.value)}
+                        placeholder="JSON設定を入力..."
+                        className={`font-mono text-sm min-h-[300px] resize-none ${
+                            !isValid ? 'border-red-500' : ''
+                        }`}
+                    />
+                    
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertDescription>
+                                ❌ {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    
+                    <div className="text-xs text-gray-500 space-y-2">
+                        <div className="font-medium">📖 JSON形式ガイド:</div>
+                        <div className="pl-2 space-y-1">
+                            <div>• <code>id</code>: 一意のモジュールID</div>
+                            <div>• <code>name</code>: 表示名</div>
+                            <div>• <code>icon</code>: 絵文字アイコン</div>
+                            <div>• <code>description</code>: 説明文</div>
+                            <div>• <code>dependencies</code>: 依存先IDの配列</div>
+                            <div>• <code>color</code>: 16進カラーコード</div>
+                            <div>• <code>classes</code>: クラス名の配列（オプション）</div>
+                            <div>• <code>classDependencies</code>: クラス間依存関係の配列（オプション）</div>
+                            <div className="ml-4 text-xs">
+                                • <code>from</code>: 依存元クラス名
+                            </div>
+                            <div className="ml-4 text-xs">
+                                • <code>to</code>: 依存先（モジュールID:クラス名）
+                            </div>
+                            <div className="ml-4 text-xs">
+                                • <code>description</code>: 依存の説明
+                            </div>
+                            <div className="ml-4 text-xs">
+                                • <code>dependencyType</code>: 依存品質（オプション）
+                                <div className="ml-4 text-xs space-y-1 mt-1">
+                                    <div>▸ <code>"good"</code>: 公開API経由の適切な依存 ✅</div>
+                                    <div>▸ <code>"bad"</code>: 内部クラス直接アクセス（非推奨） ❌</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                            <div className="font-medium text-blue-800 mb-1">💡 モジュラモノリスのベストプラクティス:</div>
+                            <div className="text-blue-700 space-y-1">
+                                <div>• 公開APIを通じた依存関係を推奨（<code>dependencyType: "good"</code>）</div>
+                                <div>• 内部クラスへの直接アクセスは避ける（<code>dependencyType: "bad"</code>）</div>
+                                <div>• 各モジュールに公開APIクラス（例：UserAPI）を作成</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ModuleClassDetails Component
+        const ModuleClassDetails = ({ modules, selectedModule, onModuleSelect, circularDependencies = [] }) => {
+            const selectedModuleData = modules.find(m => m.id === selectedModule);
+            
+            if (!selectedModuleData) return null;
+            
+            const circularModules = new Set(
+                circularDependencies.flatMap(dep => dep.modules)
+            );
+            
+            const isCircularModule = circularModules.has(selectedModule);
+            
+            const getActualClassDependencies = () => {
+                const outgoing = selectedModuleData.classDependencies || [];
+                const incoming = [];
+                
+                modules.forEach(module => {
+                    if (module.id !== selectedModule && module.classDependencies) {
+                        module.classDependencies.forEach(dep => {
+                            if (dep.to.startsWith(`${selectedModule}:`)) {
+                                incoming.push({
+                                    ...dep,
+                                    sourceModule: module
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                return { outgoing, incoming };
+            };
+            
+            const { outgoing: outgoingDeps, incoming: incomingDeps } = getActualClassDependencies();
+            
+            const getStatistics = () => {
+                const allDeps = [...outgoingDeps, ...incomingDeps];
+                const goodDeps = allDeps.filter(dep => dep.dependencyType === 'good').length;
+                const badDeps = allDeps.filter(dep => dep.dependencyType === 'bad').length;
+                
+                return { goodDeps, badDeps, totalDeps: allDeps.length };
+            };
+            
+            const stats = getStatistics();
+            
+            const ClassDependencyList = ({ dependencies, direction, emptyMessage }) => (
+                <div className="space-y-2">
+                    <div className="text-xs text-gray-500 mb-2">
+                        {dependencies.length} 件の依存先
+                    </div>
+                    
+                    {dependencies.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic">{emptyMessage}</p>
+                    ) : (
+                        <div className="space-y-1.5">
+                            {dependencies.map((dep, index) => {
+                                const [targetModuleId, targetClass] = dep.to.includes(':') 
+                                    ? dep.to.split(':') 
+                                    : [selectedModule, dep.to];
+                                
+                                const targetModule = modules.find(m => m.id === targetModuleId);
+                                const sourceModule = dep.sourceModule || selectedModuleData;
+                                
+                                const isCircularDep = circularModules.has(targetModuleId) && circularModules.has(sourceModule.id);
+                                const isGoodDep = dep.dependencyType === 'good';
+                                const isBadDep = dep.dependencyType === 'bad';
+                                
+                                let cardStyle = 'border-gray-200 bg-gray-50';
+                                if (isBadDep) {
+                                    cardStyle = 'border-red-200 bg-red-50';
+                                } else if (isGoodDep) {
+                                    cardStyle = 'border-green-200 bg-green-50';
+                                } else if (isCircularDep) {
+                                    cardStyle = 'border-red-200 bg-red-50';
+                                } else if (direction === 'outgoing') {
+                                    cardStyle = 'border-orange-200 bg-orange-50';
+                                } else {
+                                    cardStyle = 'border-blue-200 bg-blue-50';
+                                }
+                                
+                                return (
+                                    <div 
+                                        key={index} 
+                                        className={`p-2 rounded border transition-all duration-200 ${cardStyle}`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                                <div className="flex items-center gap-1 min-w-0">
+                                                    <div 
+                                                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                                        style={{ backgroundColor: sourceModule.color }}
+                                                    />
+                                                    <span className="font-mono text-xs font-medium truncate">{dep.from}</span>
+                                                </div>
+                                                
+                                                <ArrowRight 
+                                                    className={`h-2.5 w-2.5 flex-shrink-0 ${
+                                                        isBadDep ? 'text-red-600' :
+                                                        isGoodDep ? 'text-green-600' :
+                                                        isCircularDep ? 'text-red-500' : 
+                                                        direction === 'outgoing' ? 'text-orange-600' : 'text-blue-600'
+                                                    }`} 
+                                                />
+                                                
+                                                <div className="flex items-center gap-1 min-w-0">
+                                                    <div 
+                                                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                                        style={{ backgroundColor: targetModule?.color || '#6b7280' }}
+                                                    />
+                                                    <span className="font-mono text-xs font-medium truncate">{targetClass}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            {isGoodDep && (
+                                                <Badge variant="secondary" className="text-xs py-0 px-1.5 h-4 bg-green-100 text-green-800 border-green-200">
+                                                    ✅
+                                                </Badge>
+                                            )}
+                                            {isBadDep && (
+                                                <Badge variant="destructive" className="text-xs py-0 px-1.5 h-4 bg-red-100 text-red-800 border-red-200">
+                                                    ❌
+                                                </Badge>
+                                            )}
+                                            {isCircularDep && !isGoodDep && !isBadDep && (
+                                                <Badge variant="destructive" className="text-xs py-0 px-1.5 h-4 animate-pulse">
+                                                    ⚠️
+                                                </Badge>
+                                            )}
+                                            
+                                            {targetModule && targetModuleId !== selectedModule && (
+                                                <button
+                                                    onClick={() => onModuleSelect(targetModuleId)}
+                                                    className="p-0.5 rounded hover:bg-white/50 transition-colors"
+                                                    title={`${targetModule.name}に切り替える`}
+                                                >
+                                                    <ExternalLink className="h-2.5 w-2.5 text-gray-500" />
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="mt-1 flex items-center justify-between gap-2 text-xs text-gray-500">
+                                            <div className="flex items-center gap-1 min-w-0">
+                                                <span className="truncate">
+                                                    {sourceModule.icon}{sourceModule.name}
+                                                </span>
+                                                <span>→</span>
+                                                <span className="truncate">
+                                                    {targetModule?.icon}{targetModule?.name}
+                                                </span>
+                                            </div>
+                                            <span className="text-gray-600 truncate max-w-[250px]" title={dep.description}>
+                                                {dep.description}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+            
+            return (
+                <Card className="p-4">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div 
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                                    style={{ backgroundColor: selectedModuleData.color }}
+                                >
+                                    {selectedModuleData.icon}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                                        🔗 {selectedModuleData.name}
+                                        {isCircularModule && (
+                                            <Badge variant="destructive" className="animate-pulse text-xs">
+                                                ⚠️
+                                            </Badge>
+                                        )}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">{selectedModuleData.description}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-4 text-center text-xs">
+                                <div>
+                                    <div className="font-semibold text-base text-green-600">{stats.goodDeps}</div>
+                                    <div className="text-gray-500">良い依存</div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-base text-red-600">{stats.badDeps}</div>
+                                    <div className="text-gray-500">悪い依存</div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-base text-blue-600">{stats.totalDeps}</div>
+                                    <div className="text-gray-500">総数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <Separator />
+                        
+                        {stats.totalDeps > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="p-2 rounded border border-green-200 bg-green-50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <CheckCircle className="h-3 w-3 text-green-600" />
+                                            <span className="text-sm font-medium text-green-800">良い依存</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-lg font-bold text-green-800">{stats.goodDeps}</div>
+                                            <div className="text-xs text-green-600">
+                                                {Math.round((stats.goodDeps / stats.totalDeps) * 100)}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="p-2 rounded border border-red-200 bg-red-50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <XCircle className="h-3 w-3 text-red-600" />
+                                            <span className="text-sm font-medium text-red-800">悪い依存</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-lg font-bold text-red-800">{stats.badDeps}</div>
+                                            <div className="text-xs text-red-600">
+                                                {Math.round((stats.badDeps / stats.totalDeps) * 100)}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-base">🔗</span>
+                                <h4 className="font-semibold text-base">クラス間依存関係</h4>
+                            </div>
+                            
+                            {outgoingDeps.length === 0 && incomingDeps.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="text-4xl mb-2 block">🔍</span>
+                                    <p>このモジュールには実際のクラス間依存関係が定義されていません</p>
+                                    <p className="text-sm mt-1">JSON設定でclassDependenciesを追加してください</p>
+                                </div>
+                            )}
+                            
+                            {outgoingDeps.length > 0 && (
+                                <div className="space-y-2">
+                                    <h5 className="font-medium text-orange-700 flex items-center gap-2 text-sm">
+                                        📤 このモジュールから他への依存先
+                                        <Badge variant="secondary" className="bg-orange-100 text-orange-800 text-xs">
+                                            {outgoingDeps.length}
+                                        </Badge>
+                                    </h5>
+                                    <ClassDependencyList
+                                        dependencies={outgoingDeps}
+                                        direction="outgoing"
+                                        emptyMessage="このモジュールのクラスは他のモジュールのクラスに依存していません"
+                                    />
+                                </div>
+                            )}
+                            
+                            {outgoingDeps.length > 0 && incomingDeps.length > 0 && <div className="my-3"><Separator /></div>}
+                            
+                            {incomingDeps.length > 0 && (
+                                <div className="space-y-2">
+                                    <h5 className="font-medium text-blue-700 flex items-center gap-2 text-sm">
+                                        📥 他からこのモジュールへの依存元
+                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                            {incomingDeps.length}
+                                        </Badge>
+                                    </h5>
+                                    <ClassDependencyList
+                                        dependencies={incomingDeps}
+                                        direction="incoming"
+                                        emptyMessage="他のモジュールのクラスはこのモジュールのクラスに依存していません"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="border-t pt-3 text-xs">
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-center gap-4 flex-wrap text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                        <div className="w-2 h-1.5 bg-green-100 border border-green-200 rounded"></div>
+                                        良い依存
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <div className="w-2 h-1.5 bg-red-100 border border-red-200 rounded"></div>
+                                        悪い依存
+                                    </span>
+                                    {isCircularModule && (
+                                        <span className="flex items-center gap-1">
+                                            <div className="w-2 h-1.5 bg-red-100 border border-red-200 rounded"></div>
+                                            相互依存
+                                        </span>
+                                    )}
+                                    <span className="text-gray-500">💡 外部リンクで関連モジュールに移動</span>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                    <div className="p-2 bg-green-50 border border-green-200 rounded">
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <CheckCircle className="h-3 w-3 text-green-600" />
+                                            <span className="font-medium text-green-800">良い依存</span>
+                                        </div>
+                                        <p className="text-green-700">公開API経由のモジュール間通信（推奨）</p>
+                                    </div>
+                                    
+                                    <div className="p-2 bg-red-50 border border-red-200 rounded">
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <XCircle className="h-3 w-3 text-red-600" />
+                                            <span className="font-medium text-red-800">悪い依存</span>
+                                        </div>
+                                        <p className="text-red-700">内部クラス直接アクセス（要改善）</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [moduleData, setModuleData] = useState(defaultModules);
+            const [selectedModule, setSelectedModule] = useState(null);
+            const [activeTab, setActiveTab] = useState('graph');
+            const [isJsonPanelOpen, setIsJsonPanelOpen] = useState(false);
+            
+            const handleJsonUpdate = (newData) => {
+                try {
+                    setModuleData(newData);
+                } catch (error) {
+                    console.error('Invalid JSON data:', error);
+                }
+            };
+            
+            const circularDependencies = detectCircularDependencies(moduleData.modules);
+            const hasCircularDependencies = circularDependencies.length > 0;
+            
+            const getBadDependenciesCount = () => {
+                return moduleData.modules.reduce((total, module) => {
+                    const badDeps = (module.classDependencies || []).filter(dep => dep.dependencyType === 'bad');
+                    return total + badDeps.length;
+                }, 0);
+            };
+            
+            const badDependenciesCount = getBadDependenciesCount();
+            
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+                    <div className="max-w-7xl mx-auto space-y-6">
+                        {/* Header */}
+                        <div className="text-center space-y-2">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                🏗️ Modular Monolith Analyzer
+                            </h1>
+                            <p className="text-gray-500">
+                                モジュール間の依存関係を可視化して、コードの構造を理解しよう ✨
+                            </p>
+                        </div>
+                        
+                        {/* JSON Input Panel */}
+                        <Card className="p-6">
+                            <Collapsible open={isJsonPanelOpen} onOpenChange={setIsJsonPanelOpen}>
+                                <CollapsibleTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        className="w-full justify-between p-0 h-auto hover:bg-transparent"
+                                    >
+                                        <h2 className="text-xl font-semibold flex items-center gap-2">
+                                            📝 JSON設定
+                                            <Badge variant="outline" className="ml-2">
+                                                {moduleData.modules.length} モジュール
+                                            </Badge>
+                                            {hasCircularDependencies && (
+                                                <Badge variant="destructive" className="ml-1">
+                                                    ⚠️ 循環依存
+                                                </Badge>
+                                            )}
+                                        </h2>
+                                        <div className="flex items-center">
+                                            {isJsonPanelOpen ? (
+                                                <ChevronDown className="h-4 w-4 chevron" />
+                                            ) : (
+                                                <ChevronRight className="h-4 w-4 chevron" />
+                                            )}
+                                        </div>
+                                    </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-4 mt-4">
+                                    <div className="text-sm text-gray-500">
+                                        💡 モジュールの設定をカスタマイズできます
+                                    </div>
+                                    <JsonInput 
+                                        initialData={moduleData} 
+                                        onUpdate={handleJsonUpdate} 
+                                    />
+                                </CollapsibleContent>
+                            </Collapsible>
+                        </Card>
+                        
+                        {/* Visualization Panel */}
+                        <Card className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-semibold flex items-center gap-2">
+                                    🎯 依存関係ビューア
+                                    {selectedModule && (
+                                        <Badge variant="outline" className="ml-2">
+                                            {moduleData.modules.find(m => m.id === selectedModule)?.icon} {moduleData.modules.find(m => m.id === selectedModule)?.name}
+                                        </Badge>
+                                    )}
+                                </h2>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsJsonPanelOpen(!isJsonPanelOpen)}
+                                    className="flex items-center gap-2"
+                                >
+                                    ⚙️ 設定
+                                    {isJsonPanelOpen ? 'を閉じる' : 'を開く'}
+                                </Button>
+                            </div>
+                            
+                            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="graph" className="flex items-center gap-2">
+                                        📈 グラフ表示
+                                        {hasCircularDependencies && (
+                                            <span className="text-red-500">⚠️</span>
+                                        )}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="table" className="flex items-center gap-2">
+                                        📋 テーブル表示
+                                        {hasCircularDependencies && (
+                                            <span className="text-red-500">⚠️</span>
+                                        )}
+                                    </TabsTrigger>
+                                </TabsList>
+                                
+                                <TabsContent value="graph" className="mt-4">
+                                    <ModuleViewer 
+                                        modules={moduleData.modules} 
+                                        selectedModule={selectedModule}
+                                        onModuleSelect={setSelectedModule}
+                                        circularDependencies={circularDependencies}
+                                    />
+                                </TabsContent>
+                                
+                                <TabsContent value="table" className="mt-4">
+                                    <ModuleTable 
+                                        modules={moduleData.modules} 
+                                        selectedModule={selectedModule}
+                                        onModuleSelect={setSelectedModule}
+                                        circularDependencies={circularDependencies}
+                                    />
+                                </TabsContent>
+                            </Tabs>
+                        </Card>
+                        
+                        {/* Module Class Details */}
+                        {selectedModule && (
+                            <ModuleClassDetails 
+                                modules={moduleData.modules}
+                                selectedModule={selectedModule}
+                                onModuleSelect={setSelectedModule}
+                                circularDependencies={circularDependencies}
+                            />
+                        )}
+                        
+                        {/* Module Details */}
+                        <Card className="p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                ℹ️ モジュール詳細
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                {moduleData.modules.map((module) => {
+                                    const isInCircularDependency = circularDependencies.some(dep => 
+                                        dep.modules.includes(module.id)
+                                    );
+                                    
+                                    const badDeps = (module.classDependencies || []).filter(dep => dep.dependencyType === 'bad').length;
+                                    const goodDeps = (module.classDependencies || []).filter(dep => dep.dependencyType === 'good').length;
+                                    
+                                    return (
+                                        <div 
+                                            key={module.id}
+                                            className={`p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
+                                                selectedModule === module.id 
+                                                    ? 'border-indigo-300 bg-indigo-50 scale-105' 
+                                                    : isInCircularDependency
+                                                    ? 'border-red-300 bg-red-50 hover:border-red-400'
+                                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                            }`}
+                                            onClick={() => setSelectedModule(module.id)}
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">{module.icon}</span>
+                                                <span className="font-medium text-sm">{module.name}</span>
+                                                {isInCircularDependency && (
+                                                    <span className="text-red-500">⚠️</span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mb-2">
+                                                {module.description}
+                                            </p>
+                                            <div className="text-xs space-y-1">
+                                                <div>
+                                                    <span className="font-medium">依存先:</span> {module.dependencies.length || '無し'}
+                                                </div>
+                                                <div>
+                                                    <span className="font-medium">依存クラス:</span> {module.classDependencies?.length || 0}
+                                                </div>
+                                                {(goodDeps > 0 || badDeps > 0) && (
+                                                    <div className="mt-1 pt-1 border-t border-gray-200/50 space-y-1">
+                                                        {goodDeps > 0 && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-green-500">✅</span>
+                                                                <span className="text-green-700">良い依存: {goodDeps}</span>
+                                                            </div>
+                                                        )}
+                                                        {badDeps > 0 && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-red-500">❌</span>
+                                                                <span className="text-red-700">悪い依存: {badDeps}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
